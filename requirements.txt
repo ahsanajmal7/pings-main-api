@@ -1,0 +1,6 @@
+Flask
+requests
+gspread
+google-auth
+python-dotenv
+psycopg2-binary
