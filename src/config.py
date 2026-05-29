@@ -16,6 +16,7 @@ class Settings:
     max_retries: int
     retry_delay_seconds: float
     skip_called_numbers: bool
+    max_concurrent_calls: int
     vapi_base_url: str
     db_connection_string: str  # PostgreSQL connection string
 
@@ -36,6 +37,7 @@ def get_settings() -> Settings:
         max_retries=int(os.getenv("MAX_RETRIES", "2")),
         retry_delay_seconds=float(os.getenv("RETRY_DELAY_SECONDS", "2")),
         skip_called_numbers=_to_bool(os.getenv("SKIP_CALLED_NUMBERS"), default=True),
+        max_concurrent_calls=max(1, int(os.getenv("MAX_CONCURRENT_CALLS", "3"))),
         vapi_base_url=os.getenv("VAPI_BASE_URL", "https://api.vapi.ai").strip(),
         db_connection_string=os.getenv("DB_CONNECTION_STRING", "").strip(),
     )
