@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -10,7 +11,11 @@ load_dotenv()
 class Settings:
     vapi_api_key: str
     vapi_assistant_id: str
+    vapi_assistant_health_insurance: str
+    vapi_assistant_auto_insurance: str
     vapi_phone_number_id: str
+    vapi_phone_number_health_insurance: str
+    vapi_phone_number_auto_insurance: str
     min_delay_seconds: float
     max_delay_seconds: float
     max_retries: int
@@ -19,6 +24,24 @@ class Settings:
     max_concurrent_calls: int
     vapi_base_url: str
     db_connection_string: str  # PostgreSQL connection string
+
+    def assistant_id_for_vertical(self, vertical: Optional[str]) -> str:
+        """Map DB Vertical column to the matching VAPI assistant ID."""
+        key = (vertical or "").strip().lower()
+        if "auto" in key:
+            return self.vapi_assistant_auto_insurance or self.vapi_assistant_id
+        if "health" in key:
+            return self.vapi_assistant_health_insurance or self.vapi_assistant_id
+        return self.vapi_assistant_id
+
+    def phone_number_id_for_vertical(self, vertical: Optional[str]) -> str:
+        """Map DB Vertical column to the matching VAPI outbound phone number ID."""
+        key = (vertical or "").strip().lower()
+        if "auto" in key:
+            return self.vapi_phone_number_auto_insurance or self.vapi_phone_number_id
+        if "health" in key:
+            return self.vapi_phone_number_health_insurance or self.vapi_phone_number_id
+        return self.vapi_phone_number_id
 
 
 def _to_bool(value: str, default: bool = False) -> bool:
@@ -31,7 +54,19 @@ def get_settings() -> Settings:
     return Settings(
         vapi_api_key=os.getenv("VAPI_API_KEY", "").strip(),
         vapi_assistant_id=os.getenv("VAPI_ASSISTANT_ID", "").strip(),
+        vapi_assistant_health_insurance=os.getenv(
+            "VAPI_ASSISTANT_HEALTH_INSURANCE", ""
+        ).strip(),
+        vapi_assistant_auto_insurance=os.getenv(
+            "VAPI_ASSISTANT_AUTO_INSURANCE", ""
+        ).strip(),
         vapi_phone_number_id=os.getenv("VAPI_PHONE_NUMBER_ID", "").strip(),
+        vapi_phone_number_health_insurance=os.getenv(
+            "VAPI_PHONE_NUMBER_HEALTH_INSURANCE", ""
+        ).strip(),
+        vapi_phone_number_auto_insurance=os.getenv(
+            "VAPI_PHONE_NUMBER_AUTO_INSURANCE", ""
+        ).strip(),
         min_delay_seconds=float(os.getenv("MIN_DELAY_SECONDS", "2")),
         max_delay_seconds=float(os.getenv("MAX_DELAY_SECONDS", "5")),
         max_retries=int(os.getenv("MAX_RETRIES", "2")),

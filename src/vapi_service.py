@@ -25,12 +25,22 @@ class VapiService:
             "Content-Type": "application/json",
         }
 
-    def start_call(self, phone_number: str, name: str, notes: str) -> requests.Response:
+    def start_call(
+        self,
+        phone_number: str,
+        name: str,
+        notes: str,
+        assistant_id: Optional[str] = None,
+        phone_number_id: Optional[str] = None,
+    ) -> requests.Response:
         e164 = normalize_to_e164(phone_number)
         if e164 != phone_number.strip():
             logger.info("Normalized phone %r -> %s", phone_number, e164)
+        resolved_assistant_id = (assistant_id or self.assistant_id).strip()
+        if not resolved_assistant_id:
+            raise ValueError("assistant_id is required to start a call")
         payload: Dict[str, Any] = {
-            "assistantId": self.assistant_id,
+            "assistantId": resolved_assistant_id,
             "customer": {"number": e164},
             "assistantOverrides": {
                 "variableValues": {
@@ -39,8 +49,9 @@ class VapiService:
                 }
             },
         }
-        if self.phone_number_id:
-            payload["phoneNumberId"] = self.phone_number_id
+        resolved_phone_number_id = (phone_number_id or self.phone_number_id).strip()
+        if resolved_phone_number_id:
+            payload["phoneNumberId"] = resolved_phone_number_id
         return requests.post(
             f"{self.base_url}/call",
             json=payload,

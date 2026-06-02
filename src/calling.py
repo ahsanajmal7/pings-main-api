@@ -21,7 +21,33 @@ def _call_contact(
     """Start one call, wait for completion, and return partial counts."""
     result = {"called": 0, "failed": 0, "qualified": 0}
 
-    logger.info("Calling %s (%s)", contact.phone_number, contact.name)
+    assistant_id = settings.assistant_id_for_vertical(contact.vertical)
+    phone_number_id = settings.phone_number_id_for_vertical(contact.vertical)
+    if not assistant_id:
+        logger.error(
+            "No VAPI assistant configured for vertical=%r (contact %s)",
+            contact.vertical,
+            contact.phone_number,
+        )
+        result["failed"] = 1
+        return result
+    if not phone_number_id:
+        logger.error(
+            "No VAPI phone number configured for vertical=%r (contact %s)",
+            contact.vertical,
+            contact.phone_number,
+        )
+        result["failed"] = 1
+        return result
+
+    logger.info(
+        "Calling %s (%s) — vertical=%r, assistant=%s, phone_number_id=%s",
+        contact.phone_number,
+        contact.name,
+        contact.vertical,
+        assistant_id,
+        phone_number_id,
+    )
 
     success = False
     call_id = None
@@ -32,6 +58,8 @@ def _call_contact(
                 phone_number=contact.phone_number,
                 name=contact.name,
                 notes=contact.notes,
+                assistant_id=assistant_id,
+                phone_number_id=phone_number_id,
             )
             if 200 <= response.status_code < 300:
                 call_id = response.json().get("id")
@@ -91,16 +119,32 @@ def start_calling_workflow(dry_run: bool = False) -> Dict[str, Any]:
     configure_logging()
     settings = get_settings()
 
+    has_assistant = bool(
+        settings.vapi_assistant_id
+        or settings.vapi_assistant_health_insurance
+        or settings.vapi_assistant_auto_insurance
+    )
+    has_phone_number = bool(
+        settings.vapi_phone_number_id
+        or settings.vapi_phone_number_health_insurance
+        or settings.vapi_phone_number_auto_insurance
+    )
     missing_env = [
         key
         for key, value in {
             "VAPI_API_KEY": settings.vapi_api_key,
-            "VAPI_ASSISTANT_ID": settings.vapi_assistant_id,
-            "VAPI_PHONE_NUMBER_ID": settings.vapi_phone_number_id,
             "DB_CONNECTION_STRING": settings.db_connection_string,
         }.items()
         if not value
     ]
+    if not has_assistant:
+        missing_env.append(
+            "VAPI_ASSISTANT_ID (or VAPI_ASSISTANT_HEALTH_INSURANCE / VAPI_ASSISTANT_AUTO_INSURANCE)"
+        )
+    if not has_phone_number:
+        missing_env.append(
+            "VAPI_PHONE_NUMBER_ID (or VAPI_PHONE_NUMBER_HEALTH_INSURANCE / VAPI_PHONE_NUMBER_AUTO_INSURANCE)"
+        )
     if missing_env:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_env)}")
 
@@ -128,7 +172,16 @@ def start_calling_workflow(dry_run: bool = False) -> Dict[str, Any]:
             continue
 
         if dry_run:
-            logger.info("[DRY RUN] Would call %s (%s)", contact.phone_number, contact.name)
+            assistant_id = settings.assistant_id_for_vertical(contact.vertical)
+            phone_number_id = settings.phone_number_id_for_vertical(contact.vertical)
+            logger.info(
+                "[DRY RUN] Would call %s (%s) — vertical=%r, assistant=%s, phone_number_id=%s",
+                contact.phone_number,
+                contact.name,
+                contact.vertical,
+                assistant_id or "(not configured)",
+                phone_number_id or "(not configured)",
+            )
             would_call += 1
             continue
 
