@@ -41,6 +41,7 @@ class PostgreSQLService:
                     SELECT *
                     FROM "RejectedPings"
                     WHERE "IsCalled" = false
+                    AND "EventName" = 'Ping Rejected'
                     ORDER BY "CreatedAt" ASC
                 """)
                 rows = cur.fetchall()
