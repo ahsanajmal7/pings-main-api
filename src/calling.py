@@ -121,13 +121,13 @@ def start_calling_workflow(dry_run: bool = False) -> Dict[str, Any]:
 
     has_assistant = bool(
         settings.vapi_assistant_id
-        or settings.vapi_assistant_health_insurance
-        or settings.vapi_assistant_auto_insurance
+        or settings.vapi_assistant_medicare_live
+        or settings.vapi_assistant_final_expense_live
     )
     has_phone_number = bool(
         settings.vapi_phone_number_id
-        or settings.vapi_phone_number_health_insurance
-        or settings.vapi_phone_number_auto_insurance
+        or settings.vapi_phone_number_medicare_live
+        or settings.vapi_phone_number_final_expense_live
     )
     missing_env = [
         key
@@ -139,11 +139,11 @@ def start_calling_workflow(dry_run: bool = False) -> Dict[str, Any]:
     ]
     if not has_assistant:
         missing_env.append(
-            "VAPI_ASSISTANT_ID (or VAPI_ASSISTANT_HEALTH_INSURANCE / VAPI_ASSISTANT_AUTO_INSURANCE)"
+            "VAPI_ASSISTANT_ID (or VAPI_ASSISTANT_MEDICARE_LIVE / VAPI_ASSISTANT_FINAL_EXPENSE_LIVE)"
         )
     if not has_phone_number:
         missing_env.append(
-            "VAPI_PHONE_NUMBER_ID (or VAPI_PHONE_NUMBER_HEALTH_INSURANCE / VAPI_PHONE_NUMBER_AUTO_INSURANCE)"
+            "VAPI_PHONE_NUMBER_ID (or VAPI_PHONE_NUMBER_MEDICARE_LIVE / VAPI_PHONE_NUMBER_FINAL_EXPENSE_LIVE)"
         )
     if missing_env:
         raise ValueError(f"Missing required environment variables: {', '.join(missing_env)}")

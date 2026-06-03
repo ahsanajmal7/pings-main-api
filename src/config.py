@@ -11,11 +11,11 @@ load_dotenv()
 class Settings:
     vapi_api_key: str
     vapi_assistant_id: str
-    vapi_assistant_health_insurance: str
-    vapi_assistant_auto_insurance: str
+    vapi_assistant_medicare_live: str
+    vapi_assistant_final_expense_live: str
     vapi_phone_number_id: str
-    vapi_phone_number_health_insurance: str
-    vapi_phone_number_auto_insurance: str
+    vapi_phone_number_medicare_live: str
+    vapi_phone_number_final_expense_live: str
     min_delay_seconds: float
     max_delay_seconds: float
     max_retries: int
@@ -28,19 +28,19 @@ class Settings:
     def assistant_id_for_vertical(self, vertical: Optional[str]) -> str:
         """Map DB Vertical column to the matching VAPI assistant ID."""
         key = (vertical or "").strip().lower()
-        if "auto" in key:
-            return self.vapi_assistant_auto_insurance or self.vapi_assistant_id
-        if "health" in key:
-            return self.vapi_assistant_health_insurance or self.vapi_assistant_id
+        if "final expense" in key:
+            return self.vapi_assistant_final_expense_live or self.vapi_assistant_id
+        if "medicare" in key:
+            return self.vapi_assistant_medicare_live or self.vapi_assistant_id
         return self.vapi_assistant_id
 
     def phone_number_id_for_vertical(self, vertical: Optional[str]) -> str:
         """Map DB Vertical column to the matching VAPI outbound phone number ID."""
         key = (vertical or "").strip().lower()
-        if "auto" in key:
-            return self.vapi_phone_number_auto_insurance or self.vapi_phone_number_id
-        if "health" in key:
-            return self.vapi_phone_number_health_insurance or self.vapi_phone_number_id
+        if "final expense" in key:
+            return self.vapi_phone_number_final_expense_live or self.vapi_phone_number_id
+        if "medicare" in key:
+            return self.vapi_phone_number_medicare_live or self.vapi_phone_number_id
         return self.vapi_phone_number_id
 
 
@@ -54,18 +54,18 @@ def get_settings() -> Settings:
     return Settings(
         vapi_api_key=os.getenv("VAPI_API_KEY", "").strip(),
         vapi_assistant_id=os.getenv("VAPI_ASSISTANT_ID", "").strip(),
-        vapi_assistant_health_insurance=os.getenv(
-            "VAPI_ASSISTANT_HEALTH_INSURANCE", ""
+        vapi_assistant_medicare_live=os.getenv(
+            "VAPI_ASSISTANT_MEDICARE_LIVE", ""
         ).strip(),
-        vapi_assistant_auto_insurance=os.getenv(
-            "VAPI_ASSISTANT_AUTO_INSURANCE", ""
+        vapi_assistant_final_expense_live=os.getenv(
+            "VAPI_ASSISTANT_FINAL_EXPENSE_LIVE", ""
         ).strip(),
         vapi_phone_number_id=os.getenv("VAPI_PHONE_NUMBER_ID", "").strip(),
-        vapi_phone_number_health_insurance=os.getenv(
-            "VAPI_PHONE_NUMBER_HEALTH_INSURANCE", ""
+        vapi_phone_number_medicare_live=os.getenv(
+            "VAPI_PHONE_NUMBER_MEDICARE_LIVE", ""
         ).strip(),
-        vapi_phone_number_auto_insurance=os.getenv(
-            "VAPI_PHONE_NUMBER_AUTO_INSURANCE", ""
+        vapi_phone_number_final_expense_live=os.getenv(
+            "VAPI_PHONE_NUMBER_FINAL_EXPENSE_LIVE", ""
         ).strip(),
         min_delay_seconds=float(os.getenv("MIN_DELAY_SECONDS", "2")),
         max_delay_seconds=float(os.getenv("MAX_DELAY_SECONDS", "5")),
