@@ -156,6 +156,10 @@ def start_calling_workflow(dry_run: bool = False) -> Dict[str, Any]:
         base_url=settings.vapi_base_url,
     )
 
+    # ── Duplicate numbers pehle handle karo ──────────────────────────────
+    db.skip_duplicate_numbers()
+    # ─────────────────────────────────────────────────────────────────────
+
     contacts = db.get_contact_rows()
 
     called = 0

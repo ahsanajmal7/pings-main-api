@@ -33,17 +33,34 @@ class PostgreSQLService:
     def _get_conn(self):
         return psycopg2.connect(self.connection_string)
 
+    def skip_duplicate_numbers(self):
+        """Agar same phone number pehle se IsCalled=true hai to duplicate rows bhi true kar do"""
+        with self._get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE "RejectedPings"
+                    SET "IsCalled" = true
+                    WHERE "IsCalled" = false
+                    AND "CustomerPhone" IN (
+                        SELECT "CustomerPhone"
+                        FROM "RejectedPings"
+                        WHERE "IsCalled" = true
+                    )
+                """)
+            conn.commit()
+            logger.info("Duplicate numbers marked as IsCalled=true")
+
     def get_contact_rows(self) -> List[ContactRow]:
         """Fetch all contacts where IsCalled = false"""
         with self._get_conn() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute("""
-                    SELECT *
+                    SELECT DISTINCT ON ("CustomerPhone") *
                     FROM "RejectedPings"
                     WHERE "IsCalled" = false
                     AND "EventName" = 'Ping Rejected'
                     AND "Vertical" IN ('Final Expense live', 'Medicare live')
-                    ORDER BY "CreatedAt" ASC
+                    ORDER BY "CustomerPhone", "CreatedAt" ASC
                 """)
                 rows = cur.fetchall()
                 logger.info("Fetched %d contacts from RejectedPings", len(rows))
