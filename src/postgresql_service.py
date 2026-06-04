@@ -59,7 +59,18 @@ class PostgreSQLService:
                     FROM "RejectedPings"
                     WHERE "IsCalled" = false
                     AND "EventName" = 'Ping Rejected'
-                    AND "Vertical" IN ('Final Expense live', 'Medicare live')
+                    AND "Vertical" IN (
+                        'Final Expense live',
+                        'Medicare live',
+                        'Production Bathroom Remodel',
+                        'Debt Settlement',
+                        'Private Health',
+                        'Windows live',
+                        'HVAC',
+                        'Pest Control',
+                        'ACA Health Insurance',
+                        'Plumbing'
+                    )
                     ORDER BY "CustomerPhone", "CreatedAt" ASC
                 """)
                 rows = cur.fetchall()

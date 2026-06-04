@@ -123,11 +123,27 @@ def start_calling_workflow(dry_run: bool = False) -> Dict[str, Any]:
         settings.vapi_assistant_id
         or settings.vapi_assistant_medicare_live
         or settings.vapi_assistant_final_expense_live
+        or settings.vapi_assistant_bathroom_remodel
+        or settings.vapi_assistant_debt_settlement
+        or settings.vapi_assistant_private_health
+        or settings.vapi_assistant_windows_live
+        or settings.vapi_assistant_hvac
+        or settings.vapi_assistant_pest_control
+        or settings.vapi_assistant_aca_health_insurance
+        or settings.vapi_assistant_plumbing
     )
     has_phone_number = bool(
         settings.vapi_phone_number_id
         or settings.vapi_phone_number_medicare_live
         or settings.vapi_phone_number_final_expense_live
+        or settings.vapi_phone_number_bathroom_remodel
+        or settings.vapi_phone_number_debt_settlement
+        or settings.vapi_phone_number_private_health
+        or settings.vapi_phone_number_windows_live
+        or settings.vapi_phone_number_hvac
+        or settings.vapi_phone_number_pest_control
+        or settings.vapi_phone_number_aca_health_insurance
+        or settings.vapi_phone_number_plumbing
     )
     missing_env = [
         key
