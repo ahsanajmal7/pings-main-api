@@ -51,7 +51,7 @@ class PostgreSQLService:
             logger.info("Duplicate numbers marked as IsCalled=true")
 
     def get_contact_rows(self) -> List[ContactRow]:
-        """Fetch all contacts where IsCalled = false"""
+        """Fetch contacts added in last 30 minutes where IsCalled = false"""
         with self._get_conn() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute("""
@@ -59,6 +59,7 @@ class PostgreSQLService:
                     FROM "RejectedPings"
                     WHERE "IsCalled" = false
                     AND "EventName" = 'Ping Rejected'
+                    AND "CreatedAt" >= NOW() - INTERVAL '30 minutes'
                     AND "Vertical" IN (
                         'Final Expense live',
                         'Medicare live',
@@ -74,7 +75,7 @@ class PostgreSQLService:
                     ORDER BY "CustomerPhone", "CreatedAt" ASC
                 """)
                 rows = cur.fetchall()
-                logger.info("Fetched %d contacts from RejectedPings", len(rows))
+                logger.info("Fetched %d contacts from RejectedPings (last 30 mins)", len(rows))
                 return [
                     ContactRow(
                         row_number=row["Id"],
